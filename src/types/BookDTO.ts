@@ -1,7 +1,9 @@
 export interface BookDTO
 {
-    id: String;
-    title: string;
-    author: string;
+    id: string; // string primitive not the String object
+    localTitle: string;
+    localAuthors: string;
+    synopsis: string;
+    coverPath: string;
     addedAt: Date;
 }

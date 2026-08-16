@@ -1,19 +1,26 @@
-import BookCard from '../components/BookCard';
+import BookCard from '../components/Book/BookCard';
 import SearchBar from '../components/SearchBar';
 import { useBooks } from '../hooks/useBooks';
+import { Link } from 'react-router-dom';
+
 
 export const Home = () =>
 {
     const { filteredBooks, error, isLoading, searchQuery, setSearchQuery } = useBooks();
 
     return (
-    <div className="flex h-screen w-full bg-slate-900 text-slate-100 font-sans overflow-hidden">
+    <div className="flex h-screen w-full bg-surface text-primary font-sans overflow-hidden">
       
       {/* SIDEBAR */}
-      <div className="w-64 bg-slate-950 border-r border-slate-800 hidden md:flex flex-col p-6">
+      <div className="w-64 bg-base border-r border-surface-hover hidden md:flex flex-col p-6">
         <h1 className="text-2xl font-bold text-white mb-8 tracking-wide">Ravenhall</h1>
-        <nav className="flex flex-col gap-4 text-slate-400 font-medium">
-          <a href="#" className="text-white hover:text-white transition-colors">Library</a>
+        <nav className="flex flex-col gap-3 font-medium">
+          <Link to="/home" className="block bg-surface-hover/50 p-4 rounded-lg border border-borderbase/50 hover:bg-surface-hover transition-colors font-bold text-indigo-400 tracking-wider text-center">
+            Home
+          </Link>
+          <Link to="/books" className="block bg-surface-hover/50 p-4 rounded-lg border border-borderbase/50 hover:bg-surface-hover transition-colors font-bold text-indigo-400 tracking-wider text-center">
+            Books
+          </Link>
         </nav>
       </div>
 
@@ -21,9 +28,9 @@ export const Home = () =>
       <div className="flex-1 flex flex-col h-full overflow-y-auto">
         
         {/* HEADER */}
-        <header className="sticky top-0 z-10 bg-slate-900/95 backdrop-blur border-b border-slate-800 px-8 py-5 flex justify-between items-center">
+        <header className="sticky top-0 z-10 bg-surface/95 backdrop-blur border-b border-surface-hover px-8 py-5 flex justify-between items-center">
           <h2 className="text-xl font-semibold">All Books</h2>
-          <div className="w-64 h-9 bg-slate-800 rounded-md border border-slate-700 flex items-center px-3 text-sm text-slate-400">
+          <div className="w-64 h-9 bg-surface-hover rounded-md border border-borderbase flex items-center px-3 text-sm text-muted">
             <SearchBar
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
@@ -32,7 +39,7 @@ export const Home = () =>
         </header>
 
         {/* GRID CONTAINER */}
-        <main className="p-8">
+        <main className="p-8 max-w-[1600px] w-full">
           
           {error && (
             <div className="bg-red-900/20 border border-red-500/50 text-red-400 px-4 py-3 rounded-md mb-6">
@@ -42,17 +49,19 @@ export const Home = () =>
 
           {isLoading ? (
             <div className="flex items-center justify-center h-64">
-              <p className="text-slate-400 animate-pulse">Loading book data from Spring Boot...</p>
+              <p className="text-muted animate-pulse">Loading book data from Spring Boot...</p>
             </div>
           ) : filteredBooks.length > 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
               {filteredBooks.map((book) => (
-                <BookCard key={book.id} book={book} />
+                <Link to={`/books/${book.id}`} key={book.id} className="block h-full outline-none">
+                  <BookCard book={book} />
+                </Link>
               ))}
             </div>
           ) : (
             <div className="flex items-center justify-center h-64 col-span-full">
-               <p className="text-slate-400">No books found matching "{searchQuery}"</p>
+               <p className="text-muted">No books found matching "{searchQuery}"</p>
             </div>
           )}
 

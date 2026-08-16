@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import type { BookDTO } from '../types/BookDTO';
+import type BookDTO  from '../types/BookDTO';
 import apiClient from '../api/ApiClient';
 
 export function useBooks() {

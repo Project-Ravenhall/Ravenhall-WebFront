@@ -1,5 +1,17 @@
 @import "tailwindcss";
 
+@theme {
+  --color-base: var(--color-zinc-950);
+  --color-surface: var(--color-zinc-900);
+  --color-surface-hover: var(--color-zinc-800);
+  --color-borderbase: var(--color-zinc-700);
+  --color-muted-dark: var(--color-zinc-500);
+  --color-muted: var(--color-zinc-400);
+  --color-muted-light: var(--color-zinc-300);
+  --color-muted-lighter: var(--color-zinc-200);
+  --color-primary: var(--color-zinc-100);
+}
+
 *, *::before, *::after {
   box-sizing: border-box;
 }
@@ -10,4 +22,28 @@ body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Hide scrollbar globally including mobile iOS/Android */
+html, body, * {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+::-webkit-scrollbar {
+  width: 0px !important;
+  height: 0px !important;
+  background: transparent !important;
+  display: none !important;
+}
+
+/* Make react-pdf text highlights transparent to preserve the image underneath */
+.react-pdf__Page__textContent span::selection {
+    background: rgba(0, 120, 255, 0.3) !important;
+    color: transparent !important;
+}
+
+.react-pdf__Page__textContent span::-moz-selection {
+    background: rgba(0, 120, 255, 0.3) !important;
+    color: transparent !important;
 }

@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useState } from 'react';
 
 interface AuthCardProps {
   title: string;
@@ -24,7 +25,7 @@ const AuthBackground = () => (
 // this is shared input styles, it's defined once and applied to all three inputs
 const inputClassName =
   'w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-[15px] ' +
-  'placeholder:text-slate-500 outline-none transition-all duration-200 ' +
+  'placeholder:text-muted-dark outline-none transition-all duration-200 ' +
   'focus:border-indigo-500/60 focus:ring-2 focus:ring-indigo-500/20';
 
 export const AuthCard = ({
@@ -39,12 +40,14 @@ export const AuthCard = ({
   errorMessage,
   onSubmit,
 }: AuthCardProps) => {
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   return (
-    <div className="relative min-h-screen bg-slate-950 flex items-center justify-center overflow-hidden">
+    <div className="relative min-h-screen bg-base flex items-center justify-center overflow-hidden">
       <AuthBackground />
 
       {/* card */}
-      <div className="relative z-10 w-full max-w-md mx-4 py-12 px-10 rounded-3xl backdrop-blur-xl bg-slate-950/70 border border-white/10 shadow-[0_32px_64px_rgba(0,0,0,0.5),0_0_0_1px_rgba(255,255,255,0.04)_inset]">
+      <div className="relative z-10 w-full max-w-md mx-4 py-12 px-10 rounded-3xl backdrop-blur-xl bg-base/70 border border-white/10 shadow-[0_32px_64px_rgba(0,0,0,0.5),0_0_0_1px_rgba(255,255,255,0.04)_inset]">
 
         {/* logo / brand */}
         <div className="flex flex-col items-center mb-8">
@@ -56,7 +59,7 @@ export const AuthCard = ({
             </svg>
           </div>
           <h1 className="text-2xl font-bold tracking-[-0.02em] text-white">Ravenhall</h1>
-          <p className="text-sm mt-1 text-slate-400/80">{title}</p>
+          <p className="text-sm mt-1 text-muted/80">{title}</p>
         </div>
 
         {errorMessage && (
@@ -69,7 +72,7 @@ export const AuthCard = ({
         <form onSubmit={onSubmit} className="flex flex-col gap-4">
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-medium tracking-wide text-slate-400/70">USERNAME</label>
+            <label className="text-xs font-medium tracking-wide text-muted/70">USERNAME</label>
             <input
               id="auth-username"
               type="text"
@@ -83,33 +86,59 @@ export const AuthCard = ({
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-medium tracking-wide text-slate-400/70">PASSWORD</label>
-            <input
-              id="auth-password"
-              type="password"
-              placeholder="Enter your password"
-              value={password}
-              onChange={(e) => onPasswordChange(e.target.value)}
-              autoComplete={isSignup ? 'new-password' : 'current-password'}
-              required
-              className={inputClassName}
-            />
+            <label className="text-xs font-medium tracking-wide text-muted/70">PASSWORD</label>
+            <div className="relative">
+              <input
+                id="auth-password"
+                type={showPassword ? "text" : "password"}
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => onPasswordChange(e.target.value)}
+                autoComplete={isSignup ? 'new-password' : 'current-password'}
+                required
+                className={inputClassName + ' pr-12'}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-dark hover:text-muted transition-colors cursor-pointer"
+              >
+                {showPassword ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" y1="2" x2="22" y2="22"/></svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                )}
+              </button>
+            </div>
           </div>
 
           {/* isSignup && basically means a compact if-condition, if isSignup is true we continue to look on the right side and render the field */}
           {isSignup && (
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-medium tracking-wide text-slate-400/70">CONFIRM PASSWORD</label>
-              <input
-                id="auth-password-confirm"
-                type="password"
-                placeholder="Confirm your password"
-                value={passwordConfirm}
-                onChange={(e) => onPasswordConfirmChange?.(e.target.value)}
-                autoComplete="new-password"
-                required
-                className={inputClassName}
-              />
+              <label className="text-xs font-medium tracking-wide text-muted/70">CONFIRM PASSWORD</label>
+              <div className="relative">
+                <input
+                  id="auth-password-confirm"
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="Confirm your password"
+                  value={passwordConfirm}
+                  onChange={(e) => onPasswordConfirmChange?.(e.target.value)}
+                  autoComplete="new-password"
+                  required
+                  className={inputClassName + ' pr-12'}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-dark hover:text-muted transition-colors cursor-pointer"
+                >
+                  {showConfirmPassword ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" y1="2" x2="22" y2="22"/></svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                  )}
+                </button>
+              </div>
             </div>
           )}
 
@@ -125,7 +154,7 @@ export const AuthCard = ({
         </form>
 
         {/* footer link */}
-        <p className="text-center text-sm mt-6 text-slate-400/60">
+        <p className="text-center text-sm mt-6 text-muted/60">
           {isSignup ? 'Already have an account? ' : "Don't have an account? "}
           <Link
             to={isSignup ? '/login' : '/signup'}

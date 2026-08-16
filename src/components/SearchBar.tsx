@@ -10,7 +10,7 @@
         value={searchQuery}
         placeholder="Search..."
         onChange={(e) => setSearchQuery(e.target.value)}
-        className="w-full bg-transparent outline-none border-none text-slate-100 placeholder-slate-500"
+        className="w-full bg-transparent outline-none border-none text-primary placeholder-muted-dark"
       />
     );
   }

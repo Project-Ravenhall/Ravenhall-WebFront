@@ -24,3 +24,7 @@ dist-ssr
 *.sw?
 
 *.env
+*.md
+!README.md
+# PDF.js offline worker assets
+public/pdfjs/

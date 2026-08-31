@@ -1,13 +1,16 @@
-import { useParams } from 'react-router-dom';
 import apiClient from '../api/ApiClient';
-import { useEffect, useState, useMemo, useRef } from 'react';
+import { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import { Virtuoso } from 'react-virtuoso';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
+import { useParams } from 'react-router-dom';
 
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
-
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(                                                                                                                             
+      'pdfjs-dist/build/pdf.worker.min.mjs',                                                                                                                                   
+      import.meta.url,                                                                                                                                                         
+    ).toString();          
+                                                                                                                                                                                        
 const CachedPage = ({ pageIndex, cache, pageWidth }: { pageIndex: number, cache: React.RefObject<Record<number, string>>, pageWidth: number }) => {
     const pageNumber = pageIndex + 1;
     const containerRef = useRef<HTMLDivElement>(null);
@@ -53,11 +56,37 @@ export const Asset = () => {
     const [numPages, setNumPages] = useState<number | null>(null);
     const [response, setResponse] = useState<any>(null);
     const [loading, setLoading] = useState<boolean>(true);
-    const { assetId } = useParams<{ assetId: string }>();
-
-    const cache = useRef<Record<number, string>>({});
+    const [syncedPage, setSyncedPage] = useState<number | 0>(0);
     const [visibleRange, setVisibleRange] = useState({ startIndex: 0, endIndex: 0 });
     const [pageWidth, setPageWidth] = useState(Math.min(window.innerWidth - 32, 700));
+    const { assetId } = useParams<{ assetId: string }>();
+    const cache = useRef<Record<number, string>>({});
+    const version = useRef<number>(0);
+    
+    useEffect(() => {
+        apiClient.get(`/books/assets/${assetId}/progress`)
+            .then((response) => {
+                setSyncedPage(response.data.page);
+                version.current = response.data.version;
+            })
+            .catch((error)=> {
+                console.error("Error fetching current page:", error);
+            });
+    }, [assetId]);
+        
+    const rawlocalProgress = localStorage.getItem(`assetProgress_${assetId}`);
+    const localProgress = rawlocalProgress ? JSON.parse(rawlocalProgress) : null;
+    const page = () => {
+        if (localProgress && localProgress.version < version.current) {
+            return syncedPage;
+        }
+        else if (localProgress && localProgress.version === version.current) {
+            return localProgress.page;
+        }
+        else {
+            return syncedPage;
+        }
+    };
 
     useEffect(() => {
         const handleResize = () => setPageWidth(Math.min(window.innerWidth - 32, 700));
@@ -66,9 +95,9 @@ export const Asset = () => {
     }, []);
 
     const options = useMemo(() => ({
-        wasmUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/wasm/`,
-        cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
-        standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/standard_fonts/`,
+        wasmUrl: '/pdfjs/wasm/',
+        cMapUrl: '/pdfjs/cmaps/',
+        standardFontDataUrl: '/pdfjs/standard_fonts/',
     }), []);
 
     useEffect(() => {
@@ -131,6 +160,102 @@ export const Asset = () => {
         setNumPages(numPages);
     }
     
+    function getlatestPage(visibleRange: { startIndex: number, endIndex: number }): number {
+        // return Math.ceil((visibleRange.startIndex + visibleRange.endIndex) / 2);
+        return visibleRange.startIndex
+    }
+
+    // --- Progress Syncing Logic
+    // there are 2 ways we save progress, one is a timer based debounce function that saves progress every 10 seconds
+    // and the other is a beacon of hope (cool name i know) that saves progress when the user leaves the page or closes the tab
+
+    const latestPage = useRef(0);
+
+    // --- beacon of hope: save the current page to the server when the user leaves the page or closes the tab
+    const API_URL = import.meta.env.VITE_API_URL;
+    const isSaved = useRef(false);
+
+    const saveBeacon = () => {
+        const token =  localStorage.getItem('token');
+        if (!token) return;
+        if (isSaved.current) return;
+        fetch(`${API_URL}/books/assets/${assetId}/progress`, {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ page: latestPage.current, version: version.current }),
+            keepalive: true
+        })
+        .then(response => response.json())
+        .then(data => {
+            version.current = data.version; // update the version to force re-render and update cache
+        })
+        .catch(error => {
+            console.error("Error saving progress on page unload:", error);
+        });
+        isSaved.current = true;
+    };
+
+    useEffect(() => {
+        const handlevisibilityChange = () => {
+            if (document.visibilityState === "hidden") 
+                saveBeacon();
+            else if (document.visibilityState === "visible")
+                isSaved.current = false; // reset the flag when the user comes back to the page
+        }
+        window.addEventListener("visibilitychange", handlevisibilityChange);
+
+        return () => {
+            window.removeEventListener("visibilitychange", handlevisibilityChange);
+        };
+    }, []);
+
+    useEffect(() => {
+        return () => {
+            saveBeacon();
+        };
+    }, []);
+    
+    // --- end beacon of hope
+
+    // --- timer based debounce function to limit how often we save progress to localStorage and the server
+    const debounce = useCallback((func: Function, wait: number) => {
+        let timer: ReturnType<typeof setTimeout> | undefined;
+        return function (...args: any[]) {
+            clearTimeout(timer);
+            timer = setTimeout(() => func.apply(null, args), wait);
+        };
+    }, []);
+    
+    const saveProgress = (assetId: string, latestPage: number) => {
+        if (latestPage === 0) return; // when virtuoso is first loaded it falsely reports the latestPage as 0, so we ignore that case to avoid saving progress as 0
+        localStorage.setItem(`assetProgress_${assetId}`, JSON.stringify({ page: latestPage, version: version.current }));
+        apiClient.post(`books/assets/${assetId}/progress`, { page: latestPage, version: version.current })
+        .then((response) => {
+            version.current = response.data.version;
+            localStorage.setItem(`assetProgress_${assetId}`, JSON.stringify({ page: latestPage, version: version.current }));
+        })
+        .catch((error) => {
+            console.error("Error saving progress:", error);
+        });
+    };
+
+    const onPageChange = debounce((assetId: string, latestPage: number) => saveProgress(assetId, latestPage), 5000); // save progress every 5 seconds
+
+    useEffect(() => {
+        const handleOnline = () => {  apiClient.post(`books/assets/${assetId}/progress`, { page: latestPage.current, version: version.current }); };
+        window.addEventListener('online' , handleOnline);
+
+        return () => {
+            window.removeEventListener('online', handleOnline );
+        }
+    }, []);
+
+    // --- end timer based save progress function
+    // --- End of Progress Syncing Logic
+
     return (
         <div className="min-h-screen w-full bg-base flex flex-col items-center py-8">
             {loading ? (
@@ -147,16 +272,24 @@ export const Asset = () => {
                              <Virtuoso
                                  useWindowScroll
                                  totalCount={numPages}
-                                 rangeChanged={(range) => setVisibleRange(range)}
+                                 initialTopMostItemIndex={Math.max(0, page())}
+                                 rangeChanged={(range) => {
+                                     setVisibleRange(range);
+                                     latestPage.current = getlatestPage(range);                                     
+                                     if (assetId) {
+                                         localStorage.setItem(`assetProgress_${assetId}`, JSON.stringify({ page: latestPage.current, version: version.current }));
+                                     }
+                                     onPageChange(assetId, latestPage.current);
+                                 }}
                                  itemContent={(index) => (
-                                     <div key={`page_${index}`} className="mb-6 shadow-[0_0_40px_rgba(0,0,0,0.8)] rounded-md overflow-hidden border border-borderbase bg-white min-h-[50vh]">
+                                     <div key={`page_${index}`} style={{ minHeight: pageWidth * 1.4 }} className="mb-6 shadow-[1_1_40px_rgba(1,1,1,1)] rounded-md overflow-hidden border-borderbase bg-black">
                                          <CachedPage pageIndex={index} cache={cache} pageWidth={pageWidth} />
                                      </div>
                                  )}
                              />
                          )}
                      </Document>
-                 </div>
+                </div>
             )}
         </div>
     );

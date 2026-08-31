@@ -4,6 +4,8 @@ import { useBooks } from '../hooks/useBooks';
 import { Link } from 'react-router-dom';
 
 
+import { Sidebar } from '../components/Sidebar';
+
 export const Home = () =>
 {
     const { filteredBooks, error, isLoading, searchQuery, setSearchQuery } = useBooks();
@@ -12,17 +14,7 @@ export const Home = () =>
     <div className="flex h-screen w-full bg-surface text-primary font-sans overflow-hidden">
       
       {/* SIDEBAR */}
-      <div className="w-64 bg-base border-r border-surface-hover hidden md:flex flex-col p-6">
-        <h1 className="text-2xl font-bold text-white mb-8 tracking-wide">Ravenhall</h1>
-        <nav className="flex flex-col gap-3 font-medium">
-          <Link to="/home" className="block bg-surface-hover/50 p-4 rounded-lg border border-borderbase/50 hover:bg-surface-hover transition-colors font-bold text-indigo-400 tracking-wider text-center">
-            Home
-          </Link>
-          <Link to="/books" className="block bg-surface-hover/50 p-4 rounded-lg border border-borderbase/50 hover:bg-surface-hover transition-colors font-bold text-indigo-400 tracking-wider text-center">
-            Books
-          </Link>
-        </nav>
-      </div>
+      <Sidebar />
 
       {/* MAIN CONTENT */}
       <div className="flex-1 flex flex-col h-full overflow-y-auto">

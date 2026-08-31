@@ -1,10 +1,10 @@
 import { Link } from "react-router-dom";
-import type BookDTO from "../../types/BookDTO";
+import type Book from "../../types/Book";
 import { useState, useEffect } from "react";
 import apiClient from "../../api/ApiClient";
 
 interface BookDetailsCardProps {
-    book: BookDTO;
+    book: Book;
 }
 
 
@@ -49,12 +49,16 @@ export default function BookDetailsCard({ book }: BookDetailsCardProps) {
                         <div className="w-6 h-6 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin"></div>
                     </div>
                 )}
+
+                <div className="mt-8 text-sm text-muted-dark">
+                    <p>Added to library: {formattedDate}</p>
+                </div>
             </div>
 
             {/* Right Column: Book Info */}
             <div className="w-full md:w-2/3 flex flex-col gap-4">
                 <h1 className="text-3xl font-bold text-white">{book.localTitle}</h1>
-                <p className="text-lg text-muted mb-2">By {book.localAuthors?.join(', ') || 'Unknown Author'}</p>
+                <p className="text-lg text-muted mb-2">By {book.apiAuthors?.join(', ') || 'Unknown Author'}</p>
                 
                 {(book.apiReleaseYear || (book.apiGenres && book.apiGenres.length > 0)) && (
                     <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm font-medium text-indigo-400/90">
@@ -72,10 +76,6 @@ export default function BookDetailsCard({ book }: BookDetailsCardProps) {
                     {book.synopsis}
                 </div>
 
-                <div className="mt-8 text-sm text-muted-dark">
-                    <p>Added to library: {formattedDate}</p>
-                </div>
-
                 {/* Assets Section */}
                 {book.assets && book.assets.length > 0 && (
                     <div className="mt-8 pt-6 border-t border-borderbase/50">
@@ -83,19 +83,35 @@ export default function BookDetailsCard({ book }: BookDetailsCardProps) {
                         <div className="flex flex-col gap-3">
                             {book.assets.map(asset => {
                                 const sizeMB = (asset.fileSize / (1024 * 1024)).toFixed(2);
+                                const currentHumanPage = (asset.syncedPage || 0) + 1;
+                                const progressPercent = asset.pageCount > 0 
+                                    ? Math.min(100, Math.round((currentHumanPage / asset.pageCount) * 100)) 
+                                    : 0;
+                                    
                                 return (
-                                    <Link to={`/books/assets/${asset.id}`} className="hover:shine">
-                                        <div key={asset.id} className="flex justify-between items-center bg-surface-hover/50 p-4 rounded-lg border border-borderbase/50 hover:bg-surface-hover transition-colors">
-                                                <div className="font-bold text-indigo-400 tracking-wider">
-                                                    {asset.fileFormat.toUpperCase()}
+                                    <Link key={asset.id} to={`/books/assets/${asset.id}`} className="hover:shine">
+                                        <div className="flex justify-between items-center bg-surface-hover/50 p-4 rounded-lg border border-borderbase/50 hover:bg-surface-hover transition-colors">
+                                            <div className="font-bold text-indigo-400 tracking-wider">
+                                                {asset.fileFormat.toUpperCase()}
                                             </div>
-                                            <div className="text-sm text-muted flex gap-6 text-right font-medium">
+                                            <div className="text-[10px] md:text-sm text-muted flex items-center gap-6 text-right font-medium">
+                                                {/* Progress Indicator */}
+                                                {asset.pageCount > 0 && (
+                                                    <div className="flex items-center gap-2" title="Reading Progress">
+                                                        <div className="relative w-5 h-5 flex items-center justify-center">
+                                                            <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                                                                <circle cx="18" cy="18" r="16" fill="none" className="stroke-borderbase" strokeWidth="4" />
+                                                                <circle cx="18" cy="18" r="16" fill="none" className="stroke-indigo-500" strokeWidth="4" strokeDasharray="100" strokeDashoffset={100 - progressPercent} strokeLinecap="round" />
+                                                            </svg>
+                                                        </div>
+                                                        <span className="text-indigo-400">{progressPercent}% <span className="opacity-75 font-normal ml-1">(Page {currentHumanPage})</span></span>
+                                                    </div>
+                                                )}
                                                 {asset.pageCount > 0 && <span>{asset.pageCount} Pages</span>}
                                                 <span>{sizeMB} MB</span>
                                             </div>
                                         </div>
                                     </Link>
-
                                 );
                             })}
                         </div>

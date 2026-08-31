@@ -1,4 +1,4 @@
-export default interface BookDTO {
+export default interface Book {
     id: string;
     localTitle: string;
     localAuthors: string[];
@@ -9,14 +9,14 @@ export default interface BookDTO {
     addedAt: string;
     apiReleaseYear: number;
     apiGenres: string[];
-    assets: AssetDTO[];
+    assets: Asset[];
 }
 
-export interface AssetDTO {
+export interface Asset {
     id: string;
     fileFormat: string;
-    filepath: string;
     pageCount: number;
+    syncedPage: number;
     checksum: string;
     fileSize: number;
 }

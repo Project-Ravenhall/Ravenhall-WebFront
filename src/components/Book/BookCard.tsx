@@ -1,4 +1,4 @@
-import type BookDTO from "../../types/BookDTO";
+import type BookDTO from "../../types/Book";
 import { useState, useEffect } from "react";
 import apiClient from "../../api/ApiClient";
 
@@ -8,6 +8,11 @@ interface BookCardProps {
 
 export default function BookCard({ book }: BookCardProps) {
     const [coverUrl, setCoverUrl] = useState<string | null>(null);
+    const titlePref = localStorage.getItem('titlePref') || 'local';
+    const title = titlePref === 'local' ? book.localTitle : book.apiTitle;
+
+    const authorPref = localStorage.getItem('authorPref') || 'local';
+    const authors = authorPref === 'local' ? book.localAuthors : book.apiAuthors;
 
     useEffect(() => {
         let activeUrl: string | null = null;
@@ -44,8 +49,8 @@ export default function BookCard({ book }: BookCardProps) {
                     <div className="w-5 h-5 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin"></div>
                 </div>
             )}
-            <h2 className="text-lg font-semibold text-white mb-1 line-clamp-2">{book.localTitle}</h2>
-            <p className="text-sm text-muted mb-2">By {book.localAuthors?.join(', ') || 'Unknown Author'}</p>      
+            <h2 className="text-lg font-semibold text-white mb-1 line-clamp-2">{title}</h2>
+            <p className="text-sm text-muted mb-2">By {authors?.join(', ') || 'Unknown Author'}</p>      
         </div>
     );
 }

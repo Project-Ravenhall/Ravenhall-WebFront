@@ -47,3 +47,12 @@ html, body, * {
     background: rgba(0, 120, 255, 0.3) !important;
     color: transparent !important;
 }
+/* Defeat Mobile Brute-Force Dark Mode Engines */
+.bg-base {
+  background-color: transparent !important;
+  background-image: linear-gradient(var(--color-base), var(--color-base)) !important;
+}
+.bg-surface {
+  background-color: transparent !important;
+  background-image: linear-gradient(var(--color-surface), var(--color-surface)) !important;
+}

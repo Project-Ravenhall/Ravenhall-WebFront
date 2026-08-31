@@ -4,6 +4,7 @@ import { Signup } from './pages/Signup';
 import { Home } from './pages/Home';
 import { BookDetails } from './pages/BookDetails';
 import { Asset } from './pages/Asset';
+import { Settings } from './pages/Settings';
 
 export default function App() {
   return (
@@ -15,6 +16,7 @@ export default function App() {
         <Route path="/home" element={<Home />} />
         <Route path="/books/:id" element={<BookDetails />} />
         <Route path="/books/assets/:assetId" element={<Asset />} />
+        <Route path="/settings" element={<Settings />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>

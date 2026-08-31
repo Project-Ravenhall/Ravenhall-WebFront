@@ -51,13 +51,7 @@ export const AuthCard = ({
 
         {/* logo / brand */}
         <div className="flex flex-col items-center mb-8">
-          <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 bg-gradient-to-br from-indigo-500 to-violet-500 shadow-[0_8px_24px_rgba(99,102,241,0.4)]">
-            {/* Raven / feather icon */}
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 2C9 2 4 5 4 10C4 13 6 15.5 9 17L8 22H16L15 17C18 15.5 20 13 20 10C20 5 15 2 12 2Z" fill="white" fillOpacity="0.9"/>
-              <path d="M12 2C14 4 16 6 15 10C14 12 12 13 10 13" stroke="rgba(255,255,255,0.5)" strokeWidth="1" strokeLinecap="round"/>
-            </svg>
-          </div>
+          <img src="/favicon.svg" alt="Ravenhall Logo" className="w-12 h-12 mb-4 rounded-xl" />
           <h1 className="text-2xl font-bold tracking-[-0.02em] text-white">Ravenhall</h1>
           <p className="text-sm mt-1 text-muted/80">{title}</p>
         </div>

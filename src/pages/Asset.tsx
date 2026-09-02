@@ -172,51 +172,52 @@ export const Asset = () => {
     const latestPage = useRef(0);
 
     // --- beacon of hope: save the current page to the server when the user leaves the page or closes the tab
-    const API_URL = import.meta.env.VITE_API_URL;
-    const isSaved = useRef(false);
+    // ---- currently out of order (browser sends OPTIONS first which makes it a 2 step request which ultimately fails cuz there isnt enough time) ------
+    // const API_URL = import.meta.env.VITE_API_URL;
+    // const isSaved = useRef(false);
+    
+    // const saveBeacon = () => {
+    //     const token =  localStorage.getItem('token');
+    //     if (!token) return;
+    //     if (isSaved.current) return;
+    //     fetch(`${API_URL}/books/assets/${assetId}/progress`, {
+    //         method: "POST",
+    //         headers: {
+    //             "Authorization": `Bearer ${token}`,
+    //             "Content-Type": "application/json"
+    //         },
+    //         body: JSON.stringify({ page: latestPage.current, version: version.current }),
+    //         keepalive: true
+    //     })
+    //     .then(response => response.json())
+    //     .then(data => {
+    //         version.current = data.version; // update the version to force re-render and update cache
+    //     })
+    //     .catch(error => {
+    //         console.error("Error saving progress on page unload:", error);
+    //     });
+    //     isSaved.current = true;
+    // };
 
-    const saveBeacon = () => {
-        const token =  localStorage.getItem('token');
-        if (!token) return;
-        if (isSaved.current) return;
-        fetch(`${API_URL}/books/assets/${assetId}/progress`, {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${token}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ page: latestPage.current, version: version.current }),
-            keepalive: true
-        })
-        .then(response => response.json())
-        .then(data => {
-            version.current = data.version; // update the version to force re-render and update cache
-        })
-        .catch(error => {
-            console.error("Error saving progress on page unload:", error);
-        });
-        isSaved.current = true;
-    };
+    // useEffect(() => {
+    //     const handlevisibilityChange = () => {
+    //         if (document.visibilityState === "hidden") 
+    //             saveBeacon();
+    //         else if (document.visibilityState === "visible")
+    //             isSaved.current = false; // reset the flag when the user comes back to the page
+    //     }
+    //     window.addEventListener("visibilitychange", handlevisibilityChange);
 
-    useEffect(() => {
-        const handlevisibilityChange = () => {
-            if (document.visibilityState === "hidden") 
-                saveBeacon();
-            else if (document.visibilityState === "visible")
-                isSaved.current = false; // reset the flag when the user comes back to the page
-        }
-        window.addEventListener("visibilitychange", handlevisibilityChange);
+    //     return () => {
+    //         window.removeEventListener("visibilitychange", handlevisibilityChange);
+    //     };
+    // }, []);
 
-        return () => {
-            window.removeEventListener("visibilitychange", handlevisibilityChange);
-        };
-    }, []);
-
-    useEffect(() => {
-        return () => {
-            saveBeacon();
-        };
-    }, []);
+    // useEffect(() => {
+    //     return () => {
+    //         saveBeacon();
+    //     };
+    // }, []);
     
     // --- end beacon of hope
 

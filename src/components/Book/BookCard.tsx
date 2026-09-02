@@ -1,46 +1,22 @@
 import type BookDTO from "../../types/Book";
-import { useState, useEffect } from "react";
-import apiClient from "../../api/ApiClient";
+
 
 interface BookCardProps {
     book: BookDTO;
 }
 
 export default function BookCard({ book }: BookCardProps) {
-    const [coverUrl, setCoverUrl] = useState<string | null>(null);
     const titlePref = localStorage.getItem('titlePref') || 'local';
     const title = titlePref === 'local' ? book.localTitle : book.apiTitle;
 
     const authorPref = localStorage.getItem('authorPref') || 'local';
     const authors = authorPref === 'local' ? book.localAuthors : book.apiAuthors;
 
-    useEffect(() => {
-        let activeUrl: string | null = null;
-        
-        apiClient.get(`/books/${book.id}/cover`, {
-            responseType: 'arraybuffer'
-        })
-        .then((response) => {
-            const blob = new Blob([response.data]); 
-            activeUrl = URL.createObjectURL(blob);
-            setCoverUrl(activeUrl);
-        })
-        .catch((error) => {
-            console.error(`Failed to load cover for book ${book.id}:`, error);
-        });
-
-        return () => {
-            if (activeUrl) {
-                URL.revokeObjectURL(activeUrl);
-            }
-        };
-    }, [book.id]);
-
     return (
         <div className="bg-surface-hover p-4 rounded-lg shadow-md border border-borderbase flex flex-col h-full transition-all duration-300 hover:border-white-900 hover:shadow-[0_0_20px_rgba(99,102,241,0.3)] cursor-pointer">
-            {coverUrl ? (
+            {book.coverUrl ? (
                 <img 
-                    src={coverUrl} 
+                    src={book.coverUrl} 
                     alt={`${book.localTitle} cover`} 
                     className="w-full h-auto rounded mb-4 object-cover" 
                 />

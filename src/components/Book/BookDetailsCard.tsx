@@ -1,7 +1,5 @@
 import { Link } from "react-router-dom";
 import type Book from "../../types/Book";
-import { useState, useEffect } from "react";
-import apiClient from "../../api/ApiClient";
 
 interface BookDetailsCardProps {
     book: Book;
@@ -10,37 +8,14 @@ interface BookDetailsCardProps {
 
 export default function BookDetailsCard({ book }: BookDetailsCardProps) {
     const formattedDate = new Date(book.addedAt).toLocaleDateString();
-    const [coverUrl, setCoverUrl] = useState<string | null>(null);
-
-    useEffect(() => {
-        let activeUrl: string | null = null;
-        
-        apiClient.get(`/books/${book.id}/cover`, {
-            responseType: 'arraybuffer'
-        })
-        .then((response) => {
-            const blob = new Blob([response.data]); 
-            activeUrl = URL.createObjectURL(blob);
-            setCoverUrl(activeUrl);
-        })
-        .catch((error) => {
-            console.error(`Failed to load cover for book ${book.id}:`, error);
-        });
-
-        return () => {
-            if (activeUrl) {
-                URL.revokeObjectURL(activeUrl);
-            }
-        };
-    }, [book.id]);
 
     return (
         <div className="flex flex-col md:flex-row gap-8 text-muted-lighter">
             {/* Left Column: Image */}
             <div className="w-full md:w-1/3 md:max-w-xs">
-                {coverUrl ? (
+                {book.coverUrl ? (
                     <img 
-                        src={coverUrl} 
+                        src={book.coverUrl} 
                         alt={`${book.localTitle} cover`} 
                         className="w-full h-auto rounded-lg shadow-lg object-cover" 
                     />

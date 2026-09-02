@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import type BookDTO  from '../types/BookDTO';
+import type Book from '../types/Book';
 import apiClient from '../api/ApiClient';
 
 export function useBooks() {
-  const [books, setBooks] = useState<BookDTO[]>([]);
+  const [books, setBooks] = useState<Book[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(true);

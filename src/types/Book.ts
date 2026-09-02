@@ -5,7 +5,7 @@ export default interface Book {
     apiTitle: string;
     apiAuthors: string[];
     synopsis: string;
-    coverPath: string;
+    coverUrl: string;
     addedAt: string;
     apiReleaseYear: number;
     apiGenres: string[];
@@ -15,6 +15,7 @@ export default interface Book {
 export interface Asset {
     id: string;
     fileFormat: string;
+    fileUrl: string;
     pageCount: number;
     syncedPage: number;
     checksum: string;

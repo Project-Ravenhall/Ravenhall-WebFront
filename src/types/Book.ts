@@ -14,6 +14,7 @@ export default interface Book {
 
 export interface Asset {
     id: string;
+    assetName: string;
     fileFormat: string;
     fileUrl: string;
     pageCount: number;

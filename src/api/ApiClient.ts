@@ -1,5 +1,6 @@
 import axios from 'axios';
 import type { ApiError } from '../types/ApiError';
+import { toast } from 'react-hot-toast';
 
 const apiClient = axios.create({
     baseURL: import.meta.env.VITE_API_URL,
@@ -37,9 +38,9 @@ apiClient.interceptors.response.use(
             }
             
             const errorMessage = error.response.data.detail;
-            console.error(`[API Error ${status}]: ${errorMessage}`);
+            toast.error(`Error: ${errorMessage || 'An error occurred'}`);
         } else {
-            console.error("Network Error: Backend is unreachable");
+            toast.error("Network Error: Backend is unreachable");
         }
         
         return Promise.reject(error);

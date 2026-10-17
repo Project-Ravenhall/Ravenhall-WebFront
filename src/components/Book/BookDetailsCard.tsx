@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import type Book from "../../types/Book";
+import { useState } from "react";
 
 interface BookDetailsCardProps {
     book: Book;
@@ -8,6 +9,7 @@ interface BookDetailsCardProps {
 
 export default function BookDetailsCard({ book }: BookDetailsCardProps) {
     const formattedDate = new Date(book.addedAt).toLocaleDateString();
+    const [isExpanded, setIsExpanded] = useState(false);
 
     return (
         <div className="flex flex-col md:flex-row gap-8 text-muted-lighter">
@@ -47,8 +49,18 @@ export default function BookDetailsCard({ book }: BookDetailsCardProps) {
                     </div>
                 )}
                 
-                <div className="mt-4 text-muted-light leading-relaxed whitespace-pre-wrap">
-                    {book.synopsis}
+                <div className="mt-4">
+                    <div className={`text-muted-light leading-relaxed whitespace-pre-wrap ${!isExpanded ? 'line-clamp-5 md:line-clamp-none' : ''}`}>
+                        {book.synopsis}
+                    </div>
+                    {book.synopsis && book.synopsis.length > 200 && (
+                        <button 
+                            onClick={() => setIsExpanded(!isExpanded)}
+                            className="md:hidden mt-2 text-indigo-400 text-sm font-medium hover:text-indigo-300 transition-colors"
+                        >
+                            {isExpanded ? "Read less" : "Read more"}
+                        </button>
+                    )}
                 </div>
 
                 {/* Assets Section */}
@@ -65,15 +77,20 @@ export default function BookDetailsCard({ book }: BookDetailsCardProps) {
                                     
                                 return (
                                     <Link key={asset.id} to={`/books/assets/${asset.id}`} className="hover:shine">
-                                        <div className="flex justify-between items-center bg-surface-hover/50 p-4 rounded-lg border border-borderbase/50 hover:bg-surface-hover transition-colors">
-                                            <div className="font-bold text-indigo-400 tracking-wider">
-                                                {asset.fileFormat.toUpperCase()}
+                                        <div className="flex flex-col gap-2 bg-surface-hover/50 p-4 rounded-lg border border-borderbase/50 hover:bg-surface-hover transition-colors">
+                                            <div className="flex items-center gap-3">
+                                                <span className="font-bold text-indigo-400 text-xs tracking-wider uppercase px-2 py-1 bg-indigo-500/10 rounded">
+                                                    {asset.fileFormat}
+                                                </span>
+                                                <span className="font-medium text-white truncate">
+                                                    {asset.assetName || "Unknown Asset"}
+                                                </span>
                                             </div>
-                                            <div className="text-[10px] md:text-sm text-muted flex items-center gap-6 text-right font-medium">
+                                            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs md:text-sm text-muted font-medium mt-1">
                                                 {/* Progress Indicator */}
                                                 {asset.pageCount > 0 && (
                                                     <div className="flex items-center gap-2" title="Reading Progress">
-                                                        <div className="relative w-5 h-5 flex items-center justify-center">
+                                                        <div className="relative w-5 h-5 flex items-center justify-center shrink-0">
                                                             <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
                                                                 <circle cx="18" cy="18" r="16" fill="none" className="stroke-borderbase" strokeWidth="4" />
                                                                 <circle cx="18" cy="18" r="16" fill="none" className="stroke-indigo-500" strokeWidth="4" strokeDasharray="100" strokeDashoffset={100 - progressPercent} strokeLinecap="round" />
@@ -84,6 +101,9 @@ export default function BookDetailsCard({ book }: BookDetailsCardProps) {
                                                 )}
                                                 {asset.pageCount > 0 && <span>{asset.pageCount} Pages</span>}
                                                 <span>{sizeMB} MB</span>
+                                                <button className="px-3 py-1 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 hover:text-indigo-300 text-xs font-medium rounded-lg transition-all active:scale-95 cursor-pointer">
+                                                    Download
+                                                </button>
                                             </div>
                                         </div>
                                     </Link>
